@@ -8,16 +8,14 @@ import {
   Post,
   Req,
 } from '@nestjs/common';
-import { PrismaService } from '../services/prisma.service';
-import { WelcomeMessage } from '@prisma/client';
 import { AuthRequest } from '../middlewares/auth.middleware';
 import { BotService } from '../services/bot.service';
+import { EmbedInterface, GuildDB } from '@/schemas/guild';
 
 @Controller('/guilds/:guild')
 export class GuildController {
   constructor(
     private readonly bot: BotService,
-    private readonly prisma: PrismaService,
   ) {}
 
   @Get()
@@ -33,67 +31,114 @@ export class GuildController {
     };
   }
 
-  @Get('/features/welcome-message')
+  @Get('/features/welcome')
   async getFeature(@Param('guild') guild: string) {
-    const data = await this.prisma.welcomeMessage.findUnique({
-      where: {
-        id: guild,
-      },
+    const data = await GuildDB.findOne({
+      id: guild,
     });
-    if (data == null) return null;
+
+    if (data === null) return null;
 
     return {
-      message: data.message,
-      channel: data.channel,
+      enabled: data?.welcome?.enabled,
+      channel: data?.welcome?.channel,
+      embed: data?.welcome?.embed,
     };
   }
 
-  @Post('/features/welcome-message')
+  @Post('/features/welcome')
   async enableFeature(@Req() req: AuthRequest, @Param('guild') guild: string) {
     await this.bot.checkPermissions(req.session, guild);
 
-    await this.prisma.welcomeMessage.upsert({
-      create: {
-        id: guild,
+    await GuildDB.findOneAndUpdate(
+      { 
+        id: guild 
       },
-      update: {},
-      where: {
-        id: guild,
+      {
+        $setOnInsert: {
+          'welcome.enabled': true,
+        }
+      }
+    )
+
+    return 'Success';
+  }
+
+  @Patch('/features/welcome')
+  async updateFeature(
+    @Req() req: AuthRequest,
+    @Param('guild') guild: string,
+    @Body() body: WelcomeResponse,
+  ) {
+    await this.bot.checkPermissions(req.session, guild);
+
+    console.log(body);
+
+    const updated = await GuildDB.findOneAndUpdate(
+      { 
+        id: guild 
       },
+      { 
+        $set: {
+          'welcome.channel': body.channel,
+          'welcome.embed': body.embed,
+        }, 
+      },
+     );
+
+    return updated;
+  }
+
+  @Delete('/features/welcome')
+  async disableFeature(@Param('guild') guild: string, @Req() req: AuthRequest) {
+    await this.bot.checkPermissions(req.session, guild);
+
+    await GuildDB.updateOne(
+      { id: guild }, 
+      { welcome: { enabled: false } 
     });
 
     return 'Success';
   }
 
-  @Patch('/features/welcome-message')
-  async updateFeature(
-    @Req() req: AuthRequest,
-    @Param('guild') guild: string,
-    @Body() body: Partial<WelcomeMessage>,
-  ) {
-    await this.bot.checkPermissions(req.session, guild);
-
-    const updated = await this.prisma.welcomeMessage.update({
-      where: {
-        id: guild,
-      },
-      data: {
-        ...body,
-        id: undefined,
-      },
+  @Get('/features/antiphishing')
+  async getAPFeature(@Param('guild') guild: string) {
+    const data = await GuildDB.findOne({
+      id: guild,
     });
 
-    return updated;
+    if (data == null) return null;
+
+    return {
+      enabled: data?.antiphishing?.enabled,
+    };
   }
 
-  @Delete('/features/welcome-message')
-  async disableFeature(@Param('guild') guild: string, @Req() req: AuthRequest) {
+  @Post('/features/antiphishing')
+  async enableAPFeature(@Req() req: AuthRequest, @Param('guild') guild: string) {
     await this.bot.checkPermissions(req.session, guild);
 
-    await this.prisma.welcomeMessage.delete({
-      where: {
-        id: guild,
+    await GuildDB.findOneAndUpdate(
+      { 
+        id: guild 
       },
+      {
+        $setOnInsert: {
+          'antiphishing.enabled': true,
+        }
+      }
+    )
+
+    return 'Success';
+  }
+
+  @Delete('/features/antiphishing')
+  async disableAPFeature(@Param('guild') guild: string, @Req() req: AuthRequest) {
+    await this.bot.checkPermissions(req.session, guild);
+
+    await GuildDB.findOneAndUpdate(
+      { id: guild }, 
+      { antiphishing: { enabled: false } 
     });
 
     return 'Success';
@@ -114,4 +159,9 @@ export class GuildController {
 
     return [...roles.values()];
   }
+}
+
+interface WelcomeResponse {
+  channel: string;
+  embed: EmbedInterface;
 }
