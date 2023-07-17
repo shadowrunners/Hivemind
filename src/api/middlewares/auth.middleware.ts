@@ -1,7 +1,6 @@
-import { HttpStatus, HttpException } from '@nestjs/common';
-import { Injectable, NestMiddleware } from '@nestjs/common';
-import { UserSession } from '@/utils/discord';
+import { HttpStatus, HttpException, Injectable, NestMiddleware } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
+import { UserSession } from '@/utils/discord';
 
 function getToken(req: Request): UserSession {
   let data = req.headers.authorization as string | null;
