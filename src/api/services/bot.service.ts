@@ -1,4 +1,3 @@
-import { PrismaService } from './prisma.service';
 import {
   OnModuleInit,
   Injectable,
@@ -8,12 +7,13 @@ import {
 import { Client, GatewayIntentBits } from 'discord.js';
 import { getUserID, UserSession } from '@/utils/discord';
 import initClient from '@/bot/main';
+import { GuildDB } from '@/schemas/guild';
 
-type Feature = 'welcome-message';
+type Feature = 'welcome';
 
 @Injectable()
 export class BotService extends Client implements OnModuleInit {
-  constructor(private readonly prisma: PrismaService) {
+  constructor() {
     super({ intents: [GatewayIntentBits.Guilds] });
   }
 
@@ -23,15 +23,12 @@ export class BotService extends Client implements OnModuleInit {
 
   async getEnabledFeatures(guild: string): Promise<Feature[]> {
     const features: Feature[] = [];
-    const welcomeMessage = await this.prisma.welcomeMessage.count({
-      where: {
-        id: guild,
-      },
+    const welcomeMessage = await GuildDB.countDocuments({
+      id: guild,
     });
 
-    if (welcomeMessage !== 0) {
-      features.push('welcome-message');
-    }
+    if (welcomeMessage !== 0) features.push('welcome');
+    
 
     return features;
   }
@@ -47,8 +44,6 @@ export class BotService extends Client implements OnModuleInit {
     if (
       !member?.permissions.has('Administrator') &&
       guild.ownerId !== member.id
-    ) {
-      throw new HttpException('Missing permissions', HttpStatus.BAD_REQUEST);
-    }
+    ) throw new HttpException('Missing permissions', HttpStatus.BAD_REQUEST);
   }
 }
