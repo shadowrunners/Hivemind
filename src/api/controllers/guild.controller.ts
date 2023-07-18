@@ -11,6 +11,8 @@ import {
 import { AuthRequest } from '../middlewares/auth.middleware';
 import { BotService } from '../services/bot.service';
 import { EmbedInterface, GuildDB } from '@/schemas/guild';
+import { SecureStorage } from '@/utils/secureStorage';
+import { TextChannel } from 'discord.js';
 
 @Controller('/guilds/:guild')
 export class GuildController {
@@ -101,6 +103,91 @@ export class GuildController {
     return 'Success';
   }
 
+  @Get('/features/confessions')
+  async getCFFeature(@Param('guild') guild: string) {
+    const data = await GuildDB.findOne({
+      id: guild,
+    });
+
+    if (data == null) return null;
+
+    return {
+      enabled: data?.confessions?.enabled,
+      channel: data?.confessions?.channel,
+    };
+  }
+
+  @Post('/features/confessions')
+  async enableCFFeature(@Req() req: AuthRequest, @Param('guild') guild: string) {
+    await this.bot.checkPermissions(req.session, guild);
+
+    await GuildDB.updateOne(
+      { 
+        id: guild 
+      },
+      {
+        $setOnInsert: {
+          'confessions.enabled': true,
+        }
+      }
+    )
+
+    return 'Success';
+  }
+
+  @Patch('/features/confessions')
+  async updateCFFeature(
+    @Req() req: AuthRequest,
+    @Param('guild') guild: string,
+    @Body() body: ConfessionsResponse,
+  ) {
+    const secureStorage = new SecureStorage();
+    const data = await GuildDB.findOne({ id: guild });
+    await this.bot.checkPermissions(req.session, guild);
+
+    if (data?.confessions.channel !== body.channel) {
+      if (!data?.confessions.channel && !data?.confessions.webhook.id) return;
+      const webhook = await this.bot.fetchWebhook(data?.confessions.webhook.id);
+      await webhook.delete();
+    }
+
+    const channel = await this.bot.channels.fetch(body.channel) as TextChannel;
+    const webhook = await channel.createWebhook({
+      name: `${this.bot.user?.username} · Confessions`,
+      avatar: this.bot.user?.avatarURL(),
+    })
+
+    const encryptedToken = secureStorage.encrypt(
+      webhook.token as string,
+    );
+
+    const updated = await GuildDB.updateOne(
+        { id: guild },
+        {
+          $set: {
+            'confessions.channel': channel.id,
+            'confessions.webhook.id': webhook.id,
+            'confessions.webhook.token': encryptedToken,
+          },
+        },
+      );
+
+    return updated;
+  }
+
+
+  @Delete('/features/confessions')
+  async disableCFFeature(@Param('guild') guild: string, @Req() req: AuthRequest) {
+    await this.bot.checkPermissions(req.session, guild);
+
+    await GuildDB.updateOne(
+      { id: guild }, 
+      { confessions: { enabled: false } 
+    });
+
+    return 'Success';
+  }
+
   @Get('/features/antiphishing')
   async getAPFeature(@Param('guild') guild: string) {
     const data = await GuildDB.findOne({
@@ -164,4 +251,8 @@ export class GuildController {
 interface WelcomeResponse {
   channel: string;
   embed: EmbedInterface;
+}
+
+interface ConfessionsResponse {
+  channel: string;
 }
