@@ -5,9 +5,9 @@ import { UserSession } from '@/utils/discord';
 function getToken(req: Request): UserSession {
   let data = req.headers.authorization as string | null;
 
-  if (data == null || !data.startsWith('Bearer ')) {
-    throw new HttpException('You must login first', HttpStatus.UNAUTHORIZED);
-  }
+  if (data === null || !data.startsWith('Bearer ')) 
+    throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+  
 
   return {
     token_type: 'Bearer',
