@@ -10,9 +10,10 @@ export async function getUserID(accessToken: string) {
   const res = await fetch(`${API_ENDPOINT}/users/@me`, {
     method: 'GET',
     headers: {
-      Authorization: 'Bearer ' + accessToken,
+      Authorization: `Bearer ${accessToken}`,
     },
   });
+
   if (!res.ok)
     throw new HttpException(
       'Failed to get user data',
@@ -22,5 +23,6 @@ export async function getUserID(accessToken: string) {
   const user = (await res.json()) as {
     id: string;
   };
+
   return user.id;
 }
