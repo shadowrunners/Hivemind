@@ -13,7 +13,7 @@ import { BotService } from '../services/bot.service';
 import { EmbedInterface, GuildDB } from '@/schemas/guild';
 import { SecureStorage } from '@/utils/secureStorage';
 import { TextChannel } from 'discord.js';
-import { sanitize } from 'dompurify';
+import { sanitize } from 'isomorphic-dompurify';
 
 @Controller('/guilds/:guild')
 export class GuildController {
