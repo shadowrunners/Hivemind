@@ -8,6 +8,8 @@ import {
 	Patch,
 	Post,
 	Req,
+	HttpException,
+	HttpStatus,
 } from '@nestjs/common';
 import { AuthRequest } from '@/middlewares/auth.middleware';
 import { BotService } from '@/services/bot.service';
@@ -28,17 +30,21 @@ export class GuildController {
 	async getGuild(@Param('guild') guild: string): Promise<unknown> {
 		this.guild = sanitize(guild);
 
-		const data = await this.bot.api.guilds.get(guild);
-		if (data === null) return 'null';
+		try {
+			const data = await this.bot.api.guilds.get(guild);
 
-		const enabledFeatures = await this.bot.getEnabledFeatures(this.guild);
+			const enabledFeatures = await this.bot.getEnabledFeatures(this.guild);
 
-		return {
-			id: data?.id,
-			name: data?.name,
-			icon: data?.icon,
-			enabledFeatures,
-		};
+			return {
+				id: data?.id,
+				name: data?.name,
+				icon: data?.icon,
+				enabledFeatures,
+			};
+		}
+		catch (_err) {
+			throw new HttpException('Missing Cyberspace', HttpStatus.NOT_FOUND);
+		}
 	}
 
   @Get('/features/antiphishing')
