@@ -1,17 +1,7 @@
-import Cryptr from 'cryptr';
-require('dotenv').config();
+import cryptr from 'cryptr';
 
 /** The Secure Storage module of Evelyn that keeps your shit safe. */
 export class SecureStorage {
-	private cryptr: Cryptr;
-
-	constructor() {
-		this.cryptr = new Cryptr(process.env.DECRYPTION_KEY, {
-			pbkdf2Iterations: 15000,
-			saltLength: 15,
-		});
-	}
-
 	/**
 	 * Encrypts the provided value.
 	 * @public
@@ -19,9 +9,13 @@ export class SecureStorage {
 	 * @param client The Evelyn object.
 	 * @returns {string}
 	 */
-	public encrypt(value: string): string | undefined {
-		if (!value) return;
-		return this.cryptr.encrypt(value);
+	public encrypt(value: string): string {
+		const keepMyDataSecure = new cryptr(process.env.DECRYPTION_KEY, {
+			pbkdf2Iterations: 15000,
+			saltLength: 15,
+		});
+
+		return keepMyDataSecure.encrypt(value);
 	}
 
 	/**
@@ -31,8 +25,12 @@ export class SecureStorage {
 	 * @param client The Evelyn object.
 	 * @returns {string}
 	 */
-	public decrypt(encryptedValue: string): string | undefined {
-		if (!encryptedValue) return;
-		return this.cryptr.decrypt(encryptedValue);
+	public decrypt(encryptedValue: string): string {
+		const keepMyDataSecure = new cryptr(process.env.DECRYPTION_KEY, {
+			pbkdf2Iterations: 15000,
+			saltLength: 15,
+		});
+
+		return keepMyDataSecure.decrypt(encryptedValue);
 	}
 }
