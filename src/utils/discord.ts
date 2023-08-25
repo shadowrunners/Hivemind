@@ -1,4 +1,4 @@
-import { API_ENDPOINT } from '@/config';
+import { API_ENDPOINT } from '../config';
 import { HttpException, HttpStatus } from '@nestjs/common';
 
 export type UserSession = {

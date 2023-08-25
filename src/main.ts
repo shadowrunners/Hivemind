@@ -1,7 +1,7 @@
 require('dotenv').config();
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { WEB_URL } from '@/config';
+import { WEB_URL } from './config';
 import { connect } from 'mongoose';
 
 async function bootstrap() {

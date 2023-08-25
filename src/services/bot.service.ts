@@ -3,9 +3,9 @@ import {
 	HttpException,
 	HttpStatus,
 } from '@nestjs/common';
-import { getUserID, PermissionFlags, UserSession } from '@/utils/discord';
-import { GuildDB } from '@/schemas/guild';
-import { API, GatewayIntentBits } from '@discordjs/core';
+import { getUserID, PermissionFlags, UserSession } from '../utils/discord';
+import { GuildDB } from '../schemas/guild';
+import { API } from '@discordjs/core';
 import { REST } from '@discordjs/rest';
 
 type Feature = 'confessions' | 'antiphishing' | 'goodbye' | 'logs' | 'levelling' | 'tickets' | 'verification' | 'welcome';

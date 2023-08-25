@@ -1,18 +1,18 @@
 import { HttpStatus, HttpException, Injectable, NestMiddleware } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
-import { UserSession } from '@/utils/discord';
+import { UserSession } from '../utils/discord';
 
 function getToken(req: Request): UserSession {
-  let data = req.headers.authorization as string | null;
+	const data = req.headers.authorization as string | null;
 
-  if (data === null || !data.startsWith('Bearer ')) 
-    throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
-  
+	if (data === null || !data.startsWith('Bearer '))
+		throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
 
-  return {
-    token_type: 'Bearer',
-    access_token: data.slice('Bearer'.length).trim(),
-  };
+
+	return {
+		token_type: 'Bearer',
+		access_token: data.slice('Bearer'.length).trim(),
+	};
 }
 
 export interface AuthRequest {
@@ -21,7 +21,7 @@ export interface AuthRequest {
 
 @Injectable()
 export class AuthMiddleware implements NestMiddleware {
-  use(req: any, _: Response, next: NextFunction) {
-    (req.session = getToken(req)), next();
-  }
+	use(req: any, _: Response, next: NextFunction) {
+		(req.session = getToken(req)), next();
+	}
 }

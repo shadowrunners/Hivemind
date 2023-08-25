@@ -11,10 +11,10 @@ import {
 	HttpException,
 	HttpStatus,
 } from '@nestjs/common';
-import { AuthRequest } from '@/middlewares/auth.middleware';
-import { BotService } from '@/services/bot.service';
-import { EmbedInterface, GuildDB } from '@/schemas/guild';
-import { SecureStorage } from '@/utils/secureStorage';
+import { AuthRequest } from '../middlewares/auth.middleware';
+import { BotService } from '../services/bot.service';
+import { EmbedInterface, GuildDB } from '../schemas/guild';
+import { SecureStorage } from '../utils/secureStorage';
 import { sanitize } from 'isomorphic-dompurify';
 
 @Controller('/guilds/:guild')
