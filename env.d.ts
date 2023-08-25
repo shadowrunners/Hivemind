@@ -4,6 +4,7 @@ declare global {
       DATABASE_URL: string;
       BOT_TOKEN: string;
       DECRYPTION_KEY: string;
+      CLIENT_ID: string;
 
       /**
        * The url where the frontend is hosted
