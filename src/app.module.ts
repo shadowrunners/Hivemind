@@ -1,4 +1,4 @@
-import { BotService } from '@/services/bot.service';
+import { BotService } from './services/bot.service';
 
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './controllers/app.controller';
