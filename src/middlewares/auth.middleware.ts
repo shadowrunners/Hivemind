@@ -15,13 +15,13 @@ function getToken(req: Request): UserSession {
   };
 }
 
-export interface AuthRequest extends Request {
+export interface AuthRequest {
   session: UserSession;
 }
 
 @Injectable()
 export class AuthMiddleware implements NestMiddleware {
-  use(req: AuthRequest, _: Response, next: NextFunction) {
+  use(req: any, _: Response, next: NextFunction) {
     (req.session = getToken(req)), next();
   }
 }
