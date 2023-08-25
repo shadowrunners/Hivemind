@@ -1,15 +1,14 @@
 import { model, Schema } from 'mongoose';
-import { HexColorString } from 'discord.js';
 
 export interface EmbedInterface {
 	/** The message that will be sent alongside the embed. If defined, that is otherwise it doesn't do shit. */
-	messagecontent: string;
+	content: string;
 	/** The title of the embed. */
 	title: string;
 	/** The description of the embed. */
 	description: string;
 	/** The color of the embed. */
-	color: HexColorString;
+	color: `#${string}`;
 	/** The author object. */
 	author: {
 		/** The name of the author. */
