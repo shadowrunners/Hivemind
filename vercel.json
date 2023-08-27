@@ -14,7 +14,8 @@
         "GET",
         "POST",
         "DELETE",
-        "PUT"
+        "PUT",
+        "OPTIONS"
       ]
     }
   ]
