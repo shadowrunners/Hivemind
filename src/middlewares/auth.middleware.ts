@@ -5,7 +5,7 @@ import { UserSession } from '../utils/discord';
 function getToken(req: Request): UserSession {
 	const data = req.headers.authorization as string | null;
 
-	if (data === null || !data.startsWith('Bearer '))
+	if (!data || !data.startsWith('Bearer '))
 		throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
 
 
