@@ -1,7 +1,6 @@
 require('dotenv').config();
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { WEB_URL } from './config';
 import { connect } from 'mongoose';
 
 async function bootstrap() {
@@ -12,7 +11,7 @@ async function bootstrap() {
 	app.enableCors({
 		credentials: true,
 		maxAge: 40,
-		origin: WEB_URL,
+		origin: process.env.WEB_URL,
 		allowedHeaders: ['Content-Type', 'Authorization'],
 		methods: ['GET', 'HEAD', 'POST', 'DELETE', 'PATCH'],
 	});
