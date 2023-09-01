@@ -8,7 +8,6 @@ function getToken(req: Request): UserSession {
 	if (!data || !data.startsWith('Bearer '))
 		throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
 
-
 	return {
 		token_type: 'Bearer',
 		access_token: data.slice('Bearer'.length).trim(),
