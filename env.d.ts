@@ -1,3 +1,5 @@
+import { UserSession } from "@/utils/discord";
+
 declare global {
   namespace NodeJS {
     interface ProcessEnv {
@@ -17,4 +19,11 @@ declare global {
     }
   }
 }
+
+declare module 'fastify' {
+  interface FastifyRequest {
+    session: UserSession;
+  }
+}
+
 export {};

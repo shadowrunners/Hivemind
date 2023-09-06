@@ -1,8 +1,8 @@
 import { HttpStatus, HttpException, Injectable, NestMiddleware } from '@nestjs/common';
-import { Request, Response, NextFunction } from 'express';
-import { UserSession } from '../utils/discord';
+import { FastifyRequest, FastifyReply } from 'fastify';
+import { UserSession } from '@/utils/discord';
 
-function getToken(req: Request): UserSession {
+function getToken(req: FastifyRequest): UserSession {
 	const data = req.headers.authorization as string | null;
 
 	if (!data || !data.startsWith('Bearer '))
@@ -20,7 +20,8 @@ export interface AuthRequest {
 
 @Injectable()
 export class AuthMiddleware implements NestMiddleware {
-	use(req: any, _: Response, next: NextFunction) {
-		(req.session = getToken(req)), next();
+	use(req: FastifyRequest, _: FastifyReply['raw'], next: () => void) {
+		req.session = getToken(req);
+		next();
 	}
 }
