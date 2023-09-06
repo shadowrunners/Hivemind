@@ -1,4 +1,3 @@
-import { API_ENDPOINT } from '../config';
 import { HttpException, HttpStatus } from '@nestjs/common';
 
 export type UserSession = {
@@ -7,7 +6,7 @@ export type UserSession = {
 };
 
 export async function getUserID(accessToken: string) {
-	const res = await fetch(`${API_ENDPOINT}/users/@me`, {
+	const res = await fetch('https://discord.com/api/v10/users/@me', {
 		method: 'GET',
 		headers: {
 			Authorization: `Bearer ${accessToken}`,
