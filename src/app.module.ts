@@ -1,13 +1,13 @@
 import { BotService } from './services/bot.service';
+import { PrismaService } from './services/prisma.service';
 
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { AppController } from './controllers/app.controller';
 import { GuildController } from './controllers/guild.controller';
 import { AuthMiddleware } from './middlewares/auth.middleware';
 
 @Module({
-	controllers: [AppController, GuildController],
-	providers: [BotService],
+	controllers: [GuildController],
+	providers: [BotService, PrismaService],
 })
 export class AppModule implements NestModule {
 	configure(consumer: MiddlewareConsumer) {
