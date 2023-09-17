@@ -1,0 +1,146 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+type GuildsAntiphishing {
+  enabled Boolean
+}
+
+type GuildsBlacklist {
+  isBlacklisted Boolean
+  reason        String
+  time          String
+}
+
+type GuildsConfessions {
+  channel String? 
+  enabled Boolean
+  webhook GuildsConfessionsWebhook?
+}
+
+type GuildsConfessionsWebhook {
+  id    String
+  token String
+}
+
+type GuildsGoodbye {
+  enabled Boolean
+  channel String?
+  embed   GuildsGoodbyeEmbed?
+}
+
+type GuildsGoodbyeEmbed {
+  author         GuildsGoodbyeEmbedAuthor?
+  color          String?
+  content        String?
+  description    String?
+  footer         GuildsGoodbyeEmbedFooter?
+  image          String?
+  thumbnail      String?
+  title          String?
+}
+
+type GuildsGoodbyeEmbedAuthor {
+  iconURL String?
+  name    String?
+}
+
+type GuildsGoodbyeEmbedFooter {
+  iconURL String?
+  text    String?
+}
+
+type GuildsLevels {
+  channel String?
+  enabled Boolean
+  message String?
+}
+
+type GuildsLogs {
+  enabled Boolean
+  channel String?
+  webhook GuildsLogsWebhook?
+}
+
+type GuildsLogsWebhook {
+  id    String
+  token String
+}
+
+type GuildsTicketsEmbed {
+  author         GuildsTicketsEmbedAuthor?
+  description    String?
+  footer         GuildsTicketsEmbedFooter?
+  image          String?
+  content        String?
+  title          String?
+}
+
+type GuildsTicketsEmbedAuthor {
+  icon_url String?
+  name     String?
+}
+
+type GuildsTicketsEmbedFooter {
+  icon_url String?
+  text     String?
+}
+
+type GuildsVerification {
+  enabled Boolean
+  role    String?
+}
+
+type GuildsTickets {
+  enabled Boolean
+  embed   GuildsTicketsEmbed?
+  transcriptChannel String?
+  assistantRole String?
+}
+
+type GuildsWelcome {
+  channel String?
+  embed   GuildsWelcomeEmbed?
+  enabled Boolean
+}
+
+type GuildsWelcomeEmbed {
+  author         GuildsWelcomeEmbedAuthor?
+  color          String?
+  content        String?
+  description    String?
+  footer         GuildsWelcomeEmbedFooter?
+  image          String?
+  thumbnail      String?
+  title          String?
+}
+
+type GuildsWelcomeEmbedAuthor {
+  iconURL String?
+  name    String?
+}
+
+type GuildsWelcomeEmbedFooter {
+  iconURL String?
+  text    String?
+}
+
+model guilds {
+  id           String             @id @default(auto()) @map("_id") @db.ObjectId
+  v            Int                @map("__v")
+  antiphishing GuildsAntiphishing
+  blacklist    GuildsBlacklist
+  confessions  GuildsConfessions
+  goodbye      GuildsGoodbye
+  guildId      String
+  levels       GuildsLevels
+  logs         GuildsLogs
+  tickets      GuildsTickets
+  verification GuildsVerification
+  welcome      GuildsWelcome
+}
