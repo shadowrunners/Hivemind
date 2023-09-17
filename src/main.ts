@@ -1,8 +1,10 @@
-require('dotenv').config();
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
+import compression from '@fastify/compress';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { connect } from 'mongoose';
+import { config } from 'dotenv';
+
+config();
 
 async function bootstrap() {
 	const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter());
@@ -17,8 +19,8 @@ async function bootstrap() {
 		methods: ['GET', 'HEAD', 'POST', 'DELETE', 'PATCH'],
 	});
 
-	connect(process.env.DATABASE_URL).then(() => console.log('Archie has connected to the database.')).catch((err) => console.log(err));
-
+	await app.register(compression);
 	await app.listen(process.env.PORT ?? 8080, '0.0.0.0');
 }
+
 bootstrap();
