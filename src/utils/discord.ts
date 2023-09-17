@@ -5,7 +5,9 @@ export type UserSession = {
   token_type: 'Bearer';
 };
 
-export async function getUserID(accessToken: string) {
+export async function getUserId(accessToken: string | undefined) {
+	if (!accessToken) return;
+
 	const res = await fetch('https://discord.com/api/v10/users/@me', {
 		method: 'GET',
 		headers: {
@@ -26,6 +28,7 @@ export async function getUserID(accessToken: string) {
 	return user.id;
 }
 
+// eslint-disable-next-line no-shadow
 export enum PermissionFlags {
   CREATE_INSTANT_INVITE = 1 << 0,
   KICK_MEMBERS = 1 << 1,
