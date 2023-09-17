@@ -1,11 +1,13 @@
-import { UserSession } from "@/utils/discord";
-
 declare global {
   namespace NodeJS {
     interface ProcessEnv {
+      /** The URL of the database. */
       DATABASE_URL: string;
+      /** Your bots token. */
       BOT_TOKEN: string;
+      /** The decryption key used to decrypt webhooks. */
       DECRYPTION_KEY: string;
+      /** Your bots client ID. */
       CLIENT_ID: string;
 
       /**
@@ -17,12 +19,6 @@ declare global {
 
       PORT?: string;
     }
-  }
-}
-
-declare module 'fastify' {
-  interface FastifyRequest {
-    session: UserSession;
   }
 }
 
