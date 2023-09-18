@@ -10,11 +10,14 @@ import {
 	HttpException,
 	HttpStatus,
 } from '@nestjs/common';
-import { PrismaService } from '@/services/prisma.service';
+import { PrismaService } from '../services/prisma.service';
 import { SecureStorage } from '../utils/secureStorage';
 import { BotService } from '../services/bot.service';
 import { sanitize } from 'isomorphic-dompurify';
 import { FastifyRequest } from 'fastify';
+import { config } from 'dotenv';
+
+config();
 
 @Controller('/guilds/:guild')
 export class GuildController {
@@ -783,7 +786,7 @@ export class GuildController {
 	}
 
 	async getBotInfo() {
-		return await this.bot.api.users.get(process.env.CLIENT_ID);
+		return await this.bot.api.users.get(process.env.CLIENT_ID!);
 	}
 }
 

@@ -1,8 +1,11 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { getUserId, PermissionFlags } from '@/utils/discord';
+import { getUserId, PermissionFlags } from '../utils/discord';
 import { PrismaService } from './prisma.service';
 import { REST } from '@discordjs/rest';
 import { API } from '@discordjs/core';
+import { config } from 'dotenv';
+
+config();
 
 @Injectable()
 export class BotService {
@@ -10,7 +13,7 @@ export class BotService {
 	public readonly api: API;
 
 	constructor(private prisma: PrismaService) {
-		this.rest = new REST({ version: '10' }).setToken(process.env.BOT_TOKEN);
+		this.rest = new REST({ version: '10' }).setToken(process.env.BOT_TOKEN!);
 		this.api = new API(this.rest);
 	}
 
