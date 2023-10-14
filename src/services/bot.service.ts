@@ -4,6 +4,7 @@ import { PrismaService } from './prisma.service';
 import { REST } from '@discordjs/rest';
 import { API } from '@discordjs/core';
 import { config } from 'dotenv';
+import { GuildsService } from '@/guilds/services/guild.service';
 
 config();
 
@@ -12,21 +13,24 @@ export class BotService {
 	private readonly rest: REST;
 	public readonly api: API;
 
-	constructor(private prisma: PrismaService) {
+	constructor(private readonly guilds: GuildsService) {
 		this.rest = new REST({ version: '10' }).setToken(process.env.BOT_TOKEN!);
 		this.api = new API(this.rest);
 	}
 
-	public async getEnabledFeatures(guild: string): Promise<Feature[]> {
-		const features: Feature[] = [];
-		const getFeatures = await this.prisma.guilds.count({
-			where: {
-				guildId: guild,
-			},
-		});
+	public async getEnabledFeatures(guild: string) {
+		const data = await this.guilds.getGuild(guild);
 
-		if (getFeatures !== 0)
-			features.push('confessions', 'antiphishing', 'goodbye', 'logs', 'levelling', 'tickets', 'verification', 'welcome');
+		const features = [
+			{ name: 'antiphishing', enabled: () => data?.antiphishing?.enabled },
+			{ name: 'confessions', enabled: () => data?.confessions?.enabled },
+			{ name: 'goodbye', enabled: () => data?.goodbye?.enabled },
+			{ name: 'logs', enabled: () => data?.logs?.enabled },
+			{ name: 'levelling', enabled: () => data?.levels?.enabled },
+			{ name: 'tickets', enabled: () => data?.tickets?.enabled },
+			{ name: 'verification', enabled: () => data?.verification?.enabled },
+			{ name: 'welcome', enabled: () => data?.welcome?.enabled },
+		];
 
 		return features;
 	}
@@ -52,5 +56,3 @@ export class BotService {
 		) throw new HttpException('Missing permissions', HttpStatus.BAD_REQUEST);
 	}
 }
-
-type Feature = 'confessions' | 'antiphishing' | 'goodbye' | 'logs' | 'levelling' | 'tickets' | 'verification' | 'welcome';
