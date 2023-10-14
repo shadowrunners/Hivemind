@@ -3,7 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { GuildController } from './controllers/guild.controller';
 import { GuildSchema } from './schemas/guild.schema';
-import { BotService } from './services/bot.service';
+import { BotService } from '../services/bot.service';
 import { GuildsService } from './services/guild.service';
 
 @Module({
