@@ -10,12 +10,12 @@ import {
 	HttpException,
 	HttpStatus,
 } from '@nestjs/common';
-import { PrismaService } from '../services/prisma.service';
-import { SecureStorage } from '../utils/secureStorage';
-import { BotService } from '../services/bot.service';
-import { sanitize } from 'isomorphic-dompurify';
+import { SecureStorage } from '../../utils/secureStorage';
+import { BotService } from '../../services/bot.service';
 import { FastifyRequest } from 'fastify';
 import { config } from 'dotenv';
+import { GuildsService } from '../services/guild.service';
+import { EmbedInterface } from '../interfaces/guild.interface';
 
 config();
 
@@ -26,15 +26,17 @@ export class GuildController {
 
 	constructor(
 		private readonly bot: BotService,
-		private readonly prisma: PrismaService,
+		private readonly guilds: GuildsService,
 	) {
 		this.secureStorage = new SecureStorage();
 	}
 
 	@Get()
-	async getGuild(@Req() req: FastifyRequest['raw'], @Param('guild') guild: string): Promise<unknown> {
-		this.guild = sanitize(guild);
-		await this.bot.checkPermissions(req.headers.authorization, guild);
+	async getGuild(
+		@Req() { headers }: FastifyRequest['raw'],
+		@Param('guild') guild: string,
+	): Promise<unknown> {
+		await this.bot.checkPermissions(headers.authorization, guild);
 
 		try {
 			const data = await this.bot.api.guilds.get(guild);
@@ -55,15 +57,7 @@ export class GuildController {
 
 	@Get('/features/antiphishing')
 	async getAPFeature(@Param('guild') guild: string) {
-		const data = await this.prisma.guilds.findFirst({
-			where: {
-				guildId: guild,
-				antiphishing: {
-					enabled: true,
-				},
-			},
-		});
-
+		const data = await this.guilds.getGuild(guild);
 		if (!data) return null;
 
 		return {
@@ -72,17 +66,15 @@ export class GuildController {
 	}
 
 	@Post('/features/antiphishing')
-	async enableAPFeature(@Req() req: FastifyRequest['raw'], @Param('guild') guild: string) {
-		await this.bot.checkPermissions(req.headers.authorization, guild);
+	async enableAPFeature(
+		@Req() { headers }: FastifyRequest['raw'],
+		@Param('guild') guild: string,
+	) {
+		await this.bot.checkPermissions(headers.authorization, guild);
 
-		await this.prisma.guilds.updateMany({
-			where: {
-				guildId: guild,
-			},
-			data: {
-				antiphishing: {
-					enabled: true,
-				},
+		await this.guilds.updateFeature(guild, {
+			antiphishing: {
+				enabled: true,
 			},
 		});
 
@@ -90,20 +82,15 @@ export class GuildController {
 	}
 
 	@Delete('/features/antiphishing')
-	async disableAPFeature(@Param('guild') guild: string, @Req() req: FastifyRequest['raw']) {
-		await this.bot.checkPermissions(req.headers.authorization, guild);
+	async disableAPFeature(
+		@Param('guild') guild: string,
+		@Req() { headers }: FastifyRequest['raw'],
+	) {
+		await this.bot.checkPermissions(headers.authorization, guild);
 
-		await this.prisma.guilds.updateMany({
-			where: {
-				guildId: guild,
-				antiphishing: {
-					enabled: true,
-				},
-			},
-			data: {
-				antiphishing: {
-					enabled: false,
-				},
+		await this.guilds.updateFeature(guild, {
+			antiphishing: {
+				enabled: false,
 			},
 		});
 
@@ -112,15 +99,7 @@ export class GuildController {
 
 	@Get('/features/confessions')
 	async getCFFeature(@Param('guild') guild: string) {
-		const data = await this.prisma.guilds.findFirst({
-			where: {
-				guildId: guild,
-				confessions: {
-					enabled: true,
-				},
-			},
-		});
-
+		const data = await this.guilds.getGuild(guild);
 		if (!data) return null;
 
 		return {
@@ -133,17 +112,9 @@ export class GuildController {
 	async enableCFFeature(@Req() req: FastifyRequest['raw'], @Param('guild') guild: string) {
 		await this.bot.checkPermissions(req.headers.authorization, guild);
 
-		await this.prisma.guilds.updateMany({
-			where: {
-				guildId: guild,
-				confessions: {
-					enabled: false,
-				},
-			},
-			data: {
-				confessions: {
-					enabled: true,
-				},
+		await this.guilds.updateFeature(guild, {
+			confessions: {
+				enabled: true,
 			},
 		});
 
@@ -156,14 +127,7 @@ export class GuildController {
 		@Param('guild') guild: string,
 		@Body() body: ConfessionsResponse,
 	) {
-		const data = await this.prisma.guilds.findFirst({
-			where: {
-				guildId: guild,
-				confessions: {
-					enabled: true,
-				},
-			},
-		});
+		const data = await this.guilds.getGuild(guild);
 
 		await this.bot.checkPermissions(req.headers.authorization, guild);
 
@@ -181,21 +145,13 @@ export class GuildController {
 			webhook.token as string,
 		);
 
-		return await this.prisma.guilds.updateMany({
-			where: {
-				guildId: guild,
-				confessions: {
-					enabled: true,
-				},
-			},
-			data: {
-				confessions: {
-					enabled: true,
-					channel: body.channel,
-					webhook: {
-						id: webhook.id,
-						token: encryptedToken,
-					},
+		return await this.guilds.updateFeature(guild, {
+			confessions: {
+				enabled: true,
+				channel: body.channel,
+				webhook: {
+					id: webhook.id,
+					token: encryptedToken,
 				},
 			},
 		});
@@ -205,17 +161,9 @@ export class GuildController {
 	async disableCFFeature(@Param('guild') guild: string, @Req() req: FastifyRequest['raw']) {
 		await this.bot.checkPermissions(req.headers.authorization, guild);
 
-		await this.prisma.guilds.updateMany({
-			where: {
-				guildId: guild,
-				confessions: {
-					enabled: true,
-				},
-			},
-			data: {
-				confessions: {
-					enabled: false,
-				},
+		await this.guilds.updateFeature(guild, {
+			confessions: {
+				enabled: false,
 			},
 		});
 
@@ -224,15 +172,7 @@ export class GuildController {
 
 	@Get('/features/levelling')
 	async getLVLFeature(@Param('guild') guild: string) {
-		const data = await this.prisma.guilds.findFirst({
-			where: {
-				guildId: guild,
-				levels: {
-					enabled: true,
-				},
-			},
-		});
-
+		const data = await this.guilds.getGuild(guild);
 		if (!data) return null;
 
 		return {
@@ -246,17 +186,9 @@ export class GuildController {
 	async enableLVLFeature(@Req() req: FastifyRequest['raw'], @Param('guild') guild: string) {
 		await this.bot.checkPermissions(req.headers.authorization, guild);
 
-		await this.prisma.guilds.updateMany({
-			where: {
-				guildId: guild,
-				levels: {
-					enabled: true,
-				},
-			},
-			data: {
-				levels: {
-					enabled: true,
-				},
+		await this.guilds.updateFeature(guild, {
+			levels: {
+				enabled: true,
 			},
 		});
 
@@ -271,19 +203,11 @@ export class GuildController {
 	) {
 		await this.bot.checkPermissions(req.headers.authorization, guild);
 
-		return await this.prisma.guilds.updateMany({
-			where: {
-				guildId: guild,
-				levels: {
-					enabled: true,
-				},
-			},
-			data: {
-				levels: {
-					enabled: true,
-					channel: body.channel,
-					message: body.message,
-				},
+		return await this.guilds.updateFeature(guild, {
+			levels: {
+				enabled: true,
+				channel: body.channel,
+				message: body.message,
 			},
 		});
 	}
@@ -292,17 +216,9 @@ export class GuildController {
 	async disableLVLFeature(@Param('guild') guild: string, @Req() req: FastifyRequest['raw']) {
 		await this.bot.checkPermissions(req.headers.authorization, guild);
 
-		await this.prisma.guilds.updateMany({
-			where: {
-				guildId: guild,
-				levels: {
-					enabled: true,
-				},
-			},
-			data: {
-				levels: {
-					enabled: false,
-				},
+		await this.guilds.updateFeature(guild, {
+			levels: {
+				enabled: false,
 			},
 		});
 
@@ -311,15 +227,7 @@ export class GuildController {
 
 	@Get('/features/logs')
 	async getLogsFeature(@Param('guild') guild: string) {
-		const data = await this.prisma.guilds.findFirst({
-			where: {
-				guildId: guild,
-				logs: {
-					enabled: true,
-				},
-			},
-		});
-
+		const data = await this.guilds.getGuild(guild);
 		if (!data) return null;
 
 		return {
@@ -332,17 +240,9 @@ export class GuildController {
 	async enableLogsFeature(@Req() req: FastifyRequest['raw'], @Param('guild') guild: string) {
 		await this.bot.checkPermissions(req.headers.authorization, guild);
 
-		await this.prisma.guilds.updateMany({
-			where: {
-				guildId: guild,
-				logs: {
-					enabled: false,
-				},
-			},
-			data: {
-				logs: {
-					enabled: true,
-				},
+		await this.guilds.updateFeature(guild, {
+			logs: {
+				enabled: true,
 			},
 		});
 
@@ -355,14 +255,7 @@ export class GuildController {
 		@Param('guild') guild: string,
 		@Body() body: LogsResponse,
 	) {
-		const data = await this.prisma.guilds.findFirst({
-			where: {
-				guildId: guild,
-				logs: {
-					enabled: true,
-				},
-			},
-		});
+		const data = await this.guilds.getGuild(guild);
 
 		await this.bot.checkPermissions(req.headers.authorization, guild);
 
@@ -380,23 +273,16 @@ export class GuildController {
 			webhook.token as string,
 		);
 
-		return await this.prisma.guilds.updateMany({
-			where: {
-				guildId: guild,
-				logs: {
-					enabled: true,
+		return await this.guilds.updateFeature(guild, {
+			logs: {
+				enabled: true,
+				channel: body.channel,
+				webhook: {
+					id: webhook.id,
+					token: encryptedToken,
 				},
 			},
-			data: {
-				logs: {
-					enabled: true,
-					channel: body.channel,
-					webhook: {
-						id: webhook.id,
-						token: encryptedToken,
-					},
-				},
-			},
+
 		});
 	}
 
@@ -404,17 +290,9 @@ export class GuildController {
 	async disableLogsFeature(@Param('guild') guild: string, @Req() req: FastifyRequest['raw']) {
 		await this.bot.checkPermissions(req.headers.authorization, guild);
 
-		await this.prisma.guilds.updateMany({
-			where: {
-				guildId: guild,
-				logs: {
-					enabled: true,
-				},
-			},
-			data: {
-				logs: {
-					enabled: false,
-				},
+		await this.guilds.updateFeature(guild, {
+			logs: {
+				enabled: false,
 			},
 		});
 
@@ -423,15 +301,7 @@ export class GuildController {
 
 	@Get('/features/goodbye')
 	async getGBFeature(@Param('guild') guild: string) {
-		const data = await this.prisma.guilds.findFirst({
-			where: {
-				guildId: guild,
-				goodbye: {
-					enabled: true,
-				},
-			},
-		});
-
+		const data = await this.guilds.getGuild(guild);
 		if (!data) return null;
 
 		return {
@@ -445,17 +315,9 @@ export class GuildController {
 	async enableGBFeature(@Req() req: FastifyRequest['raw'], @Param('guild') guild: string) {
 		await this.bot.checkPermissions(req.headers.authorization, guild);
 
-		await this.prisma.guilds.updateMany({
-			where: {
-				guildId: guild,
-				goodbye: {
-					enabled: false,
-				},
-			},
-			data: {
-				goodbye: {
-					enabled: true,
-				},
+		await this.guilds.updateFeature(guild, {
+			goodbye: {
+				enabled: true,
 			},
 		});
 
@@ -470,19 +332,11 @@ export class GuildController {
 	) {
 		await this.bot.checkPermissions(req.headers.authorization, guild);
 
-		return await this.prisma.guilds.updateMany({
-			where: {
-				guildId: guild,
-				goodbye: {
-					enabled: true,
-				},
-			},
-			data: {
-				goodbye: {
-					enabled: true,
-					channel: body.channel,
-					embed: body.embed,
-				},
+		return await this.guilds.updateFeature(guild, {
+			goodbye: {
+				enabled: true,
+				channel: body.channel,
+				embed: body.embed,
 			},
 		});
 	}
@@ -491,17 +345,9 @@ export class GuildController {
 	async disableGBFeature(@Param('guild') guild: string, @Req() req: FastifyRequest['raw']) {
 		await this.bot.checkPermissions(req.headers.authorization, guild);
 
-		await this.prisma.guilds.updateMany({
-			where: {
-				guildId: guild,
-				goodbye: {
-					enabled: true,
-				},
-			},
-			data: {
-				goodbye: {
-					enabled: false,
-				},
+		await this.guilds.updateFeature(guild, {
+			goodbye: {
+				enabled: false,
 			},
 		});
 
@@ -510,15 +356,7 @@ export class GuildController {
 
 	@Get('/features/tickets')
 	async getTicketsFeature(@Param('guild') guild: string) {
-		const data = await this.prisma.guilds.findFirst({
-			where: {
-				guildId: guild,
-				tickets: {
-					enabled: true,
-				},
-			},
-		});
-
+		const data = await this.guilds.getGuild(guild);
 		if (!data) return null;
 
 		return {
@@ -533,17 +371,9 @@ export class GuildController {
 	async enableTicketsFeature(@Req() req: FastifyRequest['raw'], @Param('guild') guild: string) {
 		await this.bot.checkPermissions(req.headers.authorization, guild);
 
-		await this.prisma.guilds.updateMany({
-			where: {
-				guildId: guild,
-				tickets: {
-					enabled: false,
-				},
-			},
-			data: {
-				tickets: {
-					enabled: true,
-				},
+		await this.guilds.updateFeature(guild, {
+			tickets: {
+				enabled: true,
 			},
 		});
 
@@ -558,20 +388,12 @@ export class GuildController {
 	) {
 		await this.bot.checkPermissions(req.headers.authorization, guild);
 
-		return await this.prisma.guilds.updateMany({
-			where: {
-				guildId: guild,
-				tickets: {
-					enabled: true,
-				},
-			},
-			data: {
-				tickets: {
-					enabled: true,
-					embed: body.embed,
-					transcriptChannel: body.transcriptChannel,
-					assistantRole: body.assistantRole,
-				},
+		return await this.guilds.updateFeature(guild, {
+			tickets: {
+				enabled: true,
+				embed: body.embed,
+				transcriptChannel: body.transcriptChannel,
+				assistantRole: body.assistantRole,
 			},
 		});
 	}
@@ -580,17 +402,9 @@ export class GuildController {
 	async disableTicketsFeature(@Param('guild') guild: string, @Req() req: FastifyRequest['raw']) {
 		await this.bot.checkPermissions(req.headers.authorization, guild);
 
-		await this.prisma.guilds.updateMany({
-			where: {
-				guildId: guild,
-				tickets: {
-					enabled: true,
-				},
-			},
-			data: {
-				tickets: {
-					enabled: false,
-				},
+		await this.guilds.updateFeature(guild, {
+			tickets: {
+				enabled: false,
 			},
 		});
 
@@ -599,15 +413,7 @@ export class GuildController {
 
 	@Get('/features/verification')
 	async getVFFeature(@Param('guild') guild: string) {
-		const data = await this.prisma.guilds.findFirst({
-			where: {
-				guildId: guild,
-				verification: {
-					enabled: true,
-				},
-			},
-		});
-
+		const data = await this.guilds.getGuild(guild);
 		if (!data) return null;
 
 		return {
@@ -620,17 +426,9 @@ export class GuildController {
 	async enableVFFeature(@Req() req: FastifyRequest['raw'], @Param('guild') guild: string) {
 		await this.bot.checkPermissions(req.headers.authorization, guild);
 
-		await this.prisma.guilds.updateMany({
-			where: {
-				guildId: guild,
-				verification: {
-					enabled: false,
-				},
-			},
-			data: {
-				verification: {
-					enabled: true,
-				},
+		await this.guilds.updateFeature(guild, {
+			verification: {
+				enabled: true,
 			},
 		});
 
@@ -645,18 +443,10 @@ export class GuildController {
 	) {
 		await this.bot.checkPermissions(req.headers.authorization, guild);
 
-		return await this.prisma.guilds.updateMany({
-			where: {
-				guildId: guild,
-				verification: {
-					enabled: true,
-				},
-			},
-			data: {
-				verification: {
-					enabled: true,
-					role: body.role,
-				},
+		return await this.guilds.updateFeature(guild, {
+			verification: {
+				enabled: true,
+				role: body.role,
 			},
 		});
 	}
@@ -665,17 +455,9 @@ export class GuildController {
 	async disableVFFeature(@Param('guild') guild: string, @Req() req: FastifyRequest['raw']) {
 		await this.bot.checkPermissions(req.headers.authorization, guild);
 
-		await this.prisma.guilds.updateMany({
-			where: {
-				guildId: guild,
-				verification: {
-					enabled: true,
-				},
-			},
-			data: {
-				verification: {
-					enabled: false,
-				},
+		await this.guilds.updateFeature(guild, {
+			verification: {
+				enabled: false,
 			},
 		});
 
@@ -684,15 +466,7 @@ export class GuildController {
 
 	@Get('/features/welcome')
 	async getWLFeature(@Param('guild') guild: string) {
-		const data = await this.prisma.guilds.findFirst({
-			where: {
-				guildId: guild,
-				welcome: {
-					enabled: true,
-				},
-			},
-		});
-
+		const data = await this.guilds.getGuild(guild);
 		if (!data) return null;
 
 		return {
@@ -706,17 +480,9 @@ export class GuildController {
 	async enableWLFeature(@Req() req: FastifyRequest['raw'], @Param('guild') guild: string) {
 		await this.bot.checkPermissions(req.headers.authorization, guild);
 
-		await this.prisma.guilds.updateMany({
-			where: {
-				guildId: guild,
-				welcome: {
-					enabled: false,
-				},
-			},
-			data: {
-				welcome: {
-					enabled: true,
-				},
+		await this.guilds.updateFeature(guild, {
+			welcome: {
+				enabled: true,
 			},
 		});
 
@@ -731,19 +497,11 @@ export class GuildController {
 	) {
 		await this.bot.checkPermissions(req.headers.authorization, guild);
 
-		return await this.prisma.guilds.updateMany({
-			where: {
-				guildId: guild,
-				welcome: {
-					enabled: true,
-				},
-			},
-			data: {
-				welcome: {
-					enabled: true,
-					channel: body.channel,
-					embed: body.embed,
-				},
+		return await this.guilds.updateFeature(guild, {
+			welcome: {
+				enabled: true,
+				channel: body.channel,
+				embed: body.embed,
 			},
 		});
 	}
@@ -752,17 +510,9 @@ export class GuildController {
 	async disableWLFeature(@Param('guild') guild: string, @Req() req: FastifyRequest['raw']) {
 		await this.bot.checkPermissions(req.headers.authorization, guild);
 
-		await this.prisma.guilds.updateMany({
-			where: {
-				guildId: guild,
-				welcome: {
-					enabled: true,
-				},
-			},
-			data: {
-				welcome: {
-					enabled: false,
-				},
+		await this.guilds.updateFeature(guild, {
+			welcome: {
+				enabled: false,
 			},
 		});
 
@@ -825,33 +575,4 @@ interface TicketsResponse extends BaseResponse {
 interface LevelsResponse extends BaseResponse {
   channel: string;
   message: string;
-}
-
-export interface EmbedInterface {
-	/** The message that will be sent alongside the embed. If defined, that is otherwise it doesn't do shit. */
-	content: string;
-	/** The title of the embed. */
-	title: string;
-	/** The description of the embed. */
-	description: string;
-	/** The color of the embed. */
-	color: `#${string}`;
-	/** The author object. */
-	author: {
-		/** The name of the author. */
-		name: string;
-		/** The icon URL of the author. */
-		icon_url: string;
-	};
-	/** The image URL. */
-	image: string;
-	/** The URL of the thumbnail.*/
-	thumbnail: string;
-	/** The footer object. */
-	footer: {
-		/** The text of the footer. */
-		text: string;
-		/** The icon URL of the footer. */
-		icon_url: string;
-	};
 }
