@@ -1,10 +1,9 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { getUserId, PermissionFlags } from '../utils/discord';
-import { PrismaService } from './prisma.service';
 import { REST } from '@discordjs/rest';
 import { API } from '@discordjs/core';
 import { config } from 'dotenv';
-import { GuildsService } from '@/guilds/services/guild.service';
+import { GuildsService } from '../guilds/services/guild.service';
 
 config();
 
