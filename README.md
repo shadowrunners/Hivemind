@@ -1,6 +1,6 @@
 </div>
-  <h1 align=center>ArchieAPI</h1>
-  <h3 align=center>The 2nd half of Project: Firestrike, the Evelyn dashboard.</h3>
+  <h1 align=center>Hivemind</h1>
+  <h3 align=center>The API that powers Nightflyer, the Evelyn dashboard.</h3>
   
   <div align=center>
       <img src="https://img.shields.io/github/stars/shadowrunners/ArchieAPI?style=for-the-badge" />
