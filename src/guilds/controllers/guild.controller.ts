@@ -40,7 +40,7 @@ export class GuildController {
 
 		try {
 			const data = await this.bot.api.guilds.get(guild);
-			const enabledFeatures = await this.bot.getEnabledFeatures(this.guild);
+			const enabledFeatures = await this.bot.getEnabledFeatures(guild);
 
 			return {
 				id: data?.id,
@@ -536,7 +536,7 @@ export class GuildController {
 	}
 
 	async getBotInfo() {
-		return await this.bot.api.users.get(process.env.CLIENT_ID!);
+		return await this.bot.api.users.get(process.env.CLIENT_ID as string);
 	}
 }
 
