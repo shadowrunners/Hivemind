@@ -1,16 +1,14 @@
-import { BotService } from './services/bot.service';
-
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { AppController } from './controllers/app.controller';
-import { GuildController } from './controllers/guild.controller';
+import { GuildController } from './guilds/controllers/guild.controller';
 import { AuthMiddleware } from './middlewares/auth.middleware';
+import { MongooseModule } from '@nestjs/mongoose';
+import { GuildsModule } from './guilds/guild.module';
 
 @Module({
-	controllers: [AppController, GuildController],
-	providers: [BotService],
+	imports: [MongooseModule.forRoot(process.env.DATABASE_URL), GuildsModule],
 })
 export class AppModule implements NestModule {
 	configure(consumer: MiddlewareConsumer) {
-		consumer.apply(AuthMiddleware).forRoutes('guilds');
+		consumer.apply(AuthMiddleware).forRoutes(GuildController);
 	}
 }

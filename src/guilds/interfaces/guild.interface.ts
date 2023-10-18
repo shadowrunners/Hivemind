@@ -1,37 +1,8 @@
-import { model, Schema } from 'mongoose';
+import { Document } from 'mongoose';
 
-export interface EmbedInterface {
-	/** The message that will be sent alongside the embed. If defined, that is otherwise it doesn't do shit. */
-	content: string;
-	/** The title of the embed. */
-	title: string;
-	/** The description of the embed. */
-	description: string;
-	/** The color of the embed. */
-	color: `#${string}`;
-	/** The author object. */
-	author: {
-		/** The name of the author. */
-		name: string;
-		/** The icon URL of the author. */
-		icon_url: string;
-	};
-	/** The image URL. */
-	image: string;
-	/** The URL of the thumbnail.*/
-	thumbnail: string;
-	/** The footer object. */
-	footer: {
-		/** The text of the footer. */
-		text: string;
-		/** The icon URL of the footer. */
-		icon_url: string;
-	};
-}
-
-export interface GuildInterface {
+export interface Guild extends Document {
 	/** The ID of the server. */
-	id: string;
+	guildId: string;
 
 	logs: {
 		/** Indicates if the logging system is enabled or not. */
@@ -113,58 +84,37 @@ export interface GuildInterface {
 	};
 }
 
-export const GuildDB = model<GuildInterface>(
-	'GuildDB',
-	new Schema<GuildInterface>({
-		id: String,
-		logs: {
-			enabled: Boolean,
-			channel: String,
-			webhook: {
-				id: String,
-				token: String,
-			},
-		},
-		welcome: {
-			enabled: Boolean,
-			channel: String,
-			embed: Object,
-		},
-		goodbye: {
-			enabled: Boolean,
-			channel: String,
-			embed: Object,
-		},
-		blacklist: {
-			isBlacklisted: Boolean,
-			reason: String,
-			time: Number,
-		},
-		tickets: {
-			enabled: Boolean,
-			embed: Object,
-			transcriptChannel: String,
-			assistantRole: String,
-		},
-		levels: {
-			enabled: Boolean,
-			channel: String,
-			message: String,
-		},
-		confessions: {
-			enabled: Boolean,
-			channel: String,
-			webhook: {
-				id: String,
-				token: String,
-			},
-		},
-		antiphishing: {
-			enabled: Boolean,
-		},
-		verification: {
-			enabled: Boolean,
-			role: String,
-		},
-	}),
-);
+export interface EmbedInterface {
+	/** The message that will be sent alongside the embed. If defined, that is otherwise it doesn't do shit. */
+	content: string;
+	/** The title of the embed. */
+	title: string;
+	/** The description of the embed. */
+	description: string;
+	/** The color of the embed. */
+	color: `#${string}`;
+	/** The author object. */
+	author: {
+		/** The name of the author. */
+		name: string;
+		/** The icon URL of the author. */
+		icon_url: string;
+	};
+	/** The image object. */
+	image: {
+		/** The URL of the image. */
+		url: string;
+	};
+	/** The thumbnail object. */
+	thumbnail: {
+		/** The URL of the thumbnail. */
+		url: string;
+	};
+	/** The footer object. */
+	footer: {
+		/** The text of the footer. */
+		text: string;
+		/** The icon URL of the footer. */
+		icon_url: string;
+	};
+}

@@ -1,4 +1,7 @@
+import { config } from 'dotenv';
 import cryptr from 'cryptr';
+
+config();
 
 /** The Secure Storage module of Evelyn that keeps your shit safe. */
 export class SecureStorage {
