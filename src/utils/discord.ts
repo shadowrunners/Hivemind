@@ -5,7 +5,12 @@ export type UserSession = {
   token_type: 'Bearer';
 };
 
-export async function getUserId(accessToken: string | undefined) {
+/**
+ * Gets the user's ID.
+ * @param accessToken The user's access token.
+ * @returns {string | undefined} The user's ID.
+ */
+export async function getUserId(accessToken: string | undefined): Promise<string | undefined> {
 	if (!accessToken) return;
 
 	const res = await fetch('https://discord.com/api/v10/users/@me', {
