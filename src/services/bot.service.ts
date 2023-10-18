@@ -13,7 +13,7 @@ export class BotService {
 	public readonly api: API;
 
 	constructor(private readonly guilds: GuildsService) {
-		this.rest = new REST({ version: '10' }).setToken(process.env.BOT_TOKEN!);
+		this.rest = new REST({ version: '10' }).setToken(process.env.BOT_TOKEN as string);
 		this.api = new API(this.rest);
 	}
 
