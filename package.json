@@ -18,8 +18,8 @@
   "dependencies": {
     "@discordjs/core": "^1.0.1",
     "@discordjs/rest": "^2.0.1",
-    "@nestjs/common": "10.2.7",
-    "@nestjs/core": "10.2.7",
+    "@nestjs/common": "10.2.8",
+    "@nestjs/core": "10.2.8",
     "@nestjs/mongoose": "^10.0.1",
     "@nestjs/platform-fastify": "^10.2.7",
     "cryptr": "^6.3.0",
@@ -31,7 +31,7 @@
   "devDependencies": {
     "@nestjs/cli": "10.2.0",
     "@nestjs/schematics": "10.0.3",
-    "@nestjs/testing": "10.2.7",
+    "@nestjs/testing": "10.2.8",
     "@types/jest": "29.5.7",
     "@types/node": "20.8.10",
     "@types/supertest": "2.0.15",
