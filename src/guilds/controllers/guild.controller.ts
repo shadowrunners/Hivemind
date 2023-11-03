@@ -259,7 +259,7 @@ export class GuildController {
 
 		await this.bot.checkPermissions(req.headers.authorization, guild);
 
-		if (data?.confessions.channel !== body.channel && data?.logs.webhook?.id)
+		if (data?.logs.channel !== body.channel && data?.logs.webhook?.id)
 			await this.bot.api.webhooks.delete(data?.logs.webhook.id);
 
 		const self = await this.getBotInfo();
