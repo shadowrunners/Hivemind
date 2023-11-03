@@ -31,7 +31,7 @@ export class BotService {
 			{ name: 'welcome', enabled: () => data?.welcome?.enabled },
 		];
 
-		const filterFeatures = features.filter((feature) => feature.enabled);
+		const filterFeatures = features.filter((feature) => feature.enabled() === true);
 		const enabledFeatures = filterFeatures.map((feature) => feature.name);
 		return enabledFeatures.join(', ');
 	}
