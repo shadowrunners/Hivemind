@@ -27,11 +27,5 @@ export class GuildsService {
 			{ lean: true },
 		);
 	}
-
-	async count(guild: string) {
-		return await this.guilds.countDocuments({
-			guildId: guild,
-		});
-	}
 }
 

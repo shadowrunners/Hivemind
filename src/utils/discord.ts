@@ -1,10 +1,5 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 
-export type UserSession = {
-  access_token: string;
-  token_type: 'Bearer';
-};
-
 /**
  * Gets the user's ID.
  * @param accessToken The user's access token.
